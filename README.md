@@ -1,7 +1,21 @@
+# Conference Central
 App Engine application for the Udacity training course.
 
-## Products
-- [App Engine][1]
+## The Project
+1. Install Google App Engine - [App Engine][1]
+2. Clone the fullstack-nanodegree repository  
+3. Add Sessions and endpoints:  
+<ul>
+  <li> •	getConferenceSessions(websafeConferenceKey) -- Given a conference, return all sessions </li>
+  <li> •	getConferenceSessionsByType(websafeConferenceKey, typeOfSession) Given a conference, return all sessions of a specified type (eg lecture, keynote, workshop) </li>
+  <li> •	getSessionsBySpeaker(speaker) -- Given a speaker, return all sessions given by this particular speaker, across all conferences </li>
+  <li> •	createSession(SessionForm, websafeConferenceKey) -- open only to the organizer of the conference </li>
+</ul>
+4. Write SQL database and table definitions in a file (tournament.sql)  
+5. Write Python functions filling out a template of an API (tournament.py)  
+6. Run a test suite to verify your code (tournament_test.py)  
+7. 
+
 
 ## Language
 - [Python][2]
