@@ -67,7 +67,7 @@ My first query was to get speakers by rating. This was easy to implement since t
 getPercentFullConf()  
 The second query I implemented was more complicated. I decided that finding popular conferences would be made easier if people could see which were the most full. This was best expressed as a percentage, so I imported some math functions and used python to help with the fact that I needed multiple operators. Ultimately python does the heavy lifting of collecting conferences and calculating their percent full status, comparing to users parameters, and sorting the results. Users should use text based symbols for the operator as above.  
   
-getDoubleQuerySession()
+getDoubleQuerySession()  
 The query question posed is a similar issue to my percentage based query in that it requires two inequalities:  
 "Let’s say that you don't like workshops and you don't like sessions after 7 pm. How would you handle a query for all non-workshop sessions before 7 pm? What is the problem for implementing this query? What ways to solve it did you think of?"  
 You are basically looking for any session who's time starts before 7pm or time > 1900  
