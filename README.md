@@ -6,12 +6,16 @@ App Engine application for the Udacity training course.
 2. Clone the fullstack-nanodegree repository  
 3. Add Sessions and endpoints:  
 <ul>
-  <li> •	getConferenceSessions(websafeConferenceKey) -- Given a conference, return all sessions </li>
-  <li> •	getConferenceSessionsByType(websafeConferenceKey, typeOfSession) Given a conference, return all sessions of a specified type (eg lecture, keynote, workshop) </li>
-  <li> •	getSessionsBySpeaker(speaker) -- Given a speaker, return all sessions given by this particular speaker, across all conferences </li>
-  <li> •	createSession(SessionForm, websafeConferenceKey) -- open only to the organizer of the conference </li>
+  <li> getConferenceSessions(websafeConferenceKey) -- Given a conference, return all sessions </li>
+  <li> getConferenceSessionsByType(websafeConferenceKey, typeOfSession) Given a conference, return all sessions of a specified type (eg lecture, keynote, workshop) </li>
+  <li> getSessionsBySpeaker(speaker) -- Given a speaker, return all sessions given by this particular speaker, across all conferences </li>
+  <li> createSession(SessionForm, websafeConferenceKey) -- open only to the organizer of the conference </li>
 </ul>
-4. Write SQL database and table definitions in a file (tournament.sql)  
+4. Add user wishlist and endpoints:
+  *	addSessionToWishlist(SessionKey) -- adds the session to the user's list of sessions they are interested in attending
+  *	getSessionsInWishlist() -- query for all the sessions in a conference that the user is interested in
+  *	deleteSessionInWishlist(SessionKey) -- removes the session from the user’s list of sessions they are interested in attending
+
 5. Write Python functions filling out a template of an API (tournament.py)  
 6. Run a test suite to verify your code (tournament_test.py)  
 7. 
