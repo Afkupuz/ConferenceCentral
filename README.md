@@ -70,9 +70,15 @@ The second query I implemented was more complicated. I decided that finding popu
 getDoubleQuerySession()  
 The query question posed is a similar issue to my percentage based query in that it requires two inequalities:  
 "Let’s say that you don't like workshops and you don't like sessions after 7 pm. How would you handle a query for all non-workshop sessions before 7 pm? What is the problem for implementing this query? What ways to solve it did you think of?"  
-You are basically looking for any session who's time starts before 7pm or time > 1900  
-AND  
-Is not a workshop. The fact that this is an inequality is not immediately obvious. The way this is requested is: type > workshop < type  
+The issue:  
+Googles database (ndb) query can only handle one inequality filter at a time. To perform this query, we need to request:  
+Session.startTime > 1900  
+And  
+Session.typeOfSession != Workshop
+  
+The way ndb handles the != (not equal) requested is: type > workshop < type  
+So this means that any query for both these parameters would contain two inequalities.  
+  
 To solve this, I let python to do a lot of the heavy lifting. I started by requesting all sessions that start before the given time. This gives a smaller pool to work with. Once collected, I used a python for loop to check each session's type. If the session type did not match the given parameter, it was added to a secondary list. Once complete, the list was returned as the results of the filter.  
 ### Featured Speaker Task
 Adding the featured speaker gave me some trouble, but ultimately when a session is created, it passes the parent conference key and its own key to the task manager which passes the information to a method that picks it apart and finds multiple speakers. If there are multiple speakers, they are added to the memcache along with associated sessions.
