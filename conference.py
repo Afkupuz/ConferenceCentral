@@ -687,8 +687,7 @@ class ConferenceApi(remote.Service):
         newSession.put()
         # add featured speaker to task que
         taskqueue.add(
-            params={'websafeConferenceKey': wsck,
-                    'websafeSessionKey': the_key},
+            params={'websafeConferenceKey': wsck},
             url='/tasks/set_featured_speaker'
             )
         return self._copySessionToForm(newSession)
@@ -1019,47 +1018,44 @@ class ConferenceApi(remote.Service):
     @staticmethod
     def _cacheSpeaker(request):
         """ Memcache speaker announcement """
-        print 'got to cache'
-        # set empty list
-        spk_array = []
-        # get all sessions in current conference
+        # print 'got to cache'
+        # init dic for organizing speaker and sessions
+        spk_dic = {}
+        # init return string
+        featured = ""
+        # get all sessions with speakers in current conference
+        # use ancestor query for strong consistency
         wsck = request.get('websafeConferenceKey')
-        sessions = Session.query().filter(
-            Session.websafeConferenceKey == wsck)
-        # get created session
-        wssk = request.get('websafeSessionKey')
-        newSess = ndb.Key(urlsafe=wssk).get()
-        # build array of sessions that share speakers
+        sessions = Session.query(
+                ancestor = ndb.Key(urlsafe=wsck))
+        # create dictionary with organized speakers and sessions
         for sess in sessions:
-            # make sure that we dont count the recently created session
-            if sess.key != newSess.key:
-                # check for keys
-                if sess.speakerKeys:
-                    # for each speaker key in all sessions
-                    for spk_key in sess.speakerKeys:
-                        # for each speaker in the recent session
-                        for keys in newSess.speakerKeys:
-                            # compare keys and add session if they match
-                            if spk_key == keys:
-                                if sess in spk_array:
-                                    print 'there already'
-                                else:
-                                    spk_array.append(sess)
-                                    speaker = ndb.Key(urlsafe=spk_key).get()
+            # check for empty speaker key arrays
+            if len(sess.speakerKeys) > 0:
+                for spk_key in sess.speakerKeys:
+                    if spk_key in spk_dic.keys():
+                        spk_dic[spk_key].append(sess)
+                    else:
+                        spk_dic[spk_key] = [sess]
+        # iterate through speakers
+        for spk_key in spk_dic:
+            # if speakers are present in more than one session
+            if len(spk_dic[spk_key]) > 1:
+                # get speaker information
+                # should use spk_array to get name rather than get?
+                speaker = ndb.Key(urlsafe=spk_key).get()
+                # set featured speaker
+                featured_speaker = FEATURED_SPEAKER_TPL % (
+                    speaker.name,
+                    ', '.join(s.name for s in spk_dic[spk_key])
+                    )
+            else:
+                featured_speaker = ""
+            # combine featured speakers if there are more than one
+            featured += featured_speaker + "\n"
 
-        if len(spk_array) > 0:
-            # add created session that was left out if others were found
-            spk_array.append(newSess)
-            # set featured speaker
-            featured_speaker = FEATURED_SPEAKER_TPL % (
-                speaker.name,
-                ', '.join(s.name for s in spk_array)
-            )
-            # setting the memcache key allows for conference unique keys
-            memcache.set(
-                MEMCACHE_FEATURED_SPEAKER_KEY + wsck, featured_speaker)
-        else:
-            featured_speaker = ""
+        # setting the memcache key allows for conference unique keys
+        memcache.set(MEMCACHE_FEATURED_SPEAKER_KEY + wsck, featured)
 
         return featured_speaker
 
