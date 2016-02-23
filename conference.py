@@ -133,6 +133,10 @@ FEAT_GET_SPEAKER = endpoints.ResourceContainer(
     message_types.VoidMessage,
     websafeConferenceKey=messages.StringField(1))
 
+SPK_GET_SPEAKER = endpoints.ResourceContainer(
+    message_types.VoidMessage,
+    websafeSpeakerKey=messages.StringField(1))
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
@@ -673,22 +677,22 @@ class ConferenceApi(remote.Service):
         else:
             data['typeOfSession'] = str(TypeOfSession.Not_Specified)
 
-        # allocate new Session ID with Profile key as parent
+        # allocate new Session ID using conference parent
         s_id = Session.allocate_ids(size=1, parent=conf.key)[0]
         # make Session key from ID
         s_key = ndb.Key(Session, s_id, parent=conf.key)
         data['key'] = s_key
-        # create Session & return (modified) ConferenceForm
-        hold = Session(**data)
-        the_key = hold.key.urlsafe()
-        hold.put()
+        # store session so that the key can be added to the task
+        newSession = Session(**data)
+        the_key = newSession.key.urlsafe()
+        newSession.put()
         # add featured speaker to task que
         taskqueue.add(
             params={'websafeConferenceKey': wsck,
                     'websafeSessionKey': the_key},
             url='/tasks/set_featured_speaker'
             )
-        return request
+        return self._copySessionToForm(newSession)
 
     @endpoints.method(SessionForm, SessionForm,
                       path='conference/newsession',
@@ -743,7 +747,7 @@ class ConferenceApi(remote.Service):
             sessions=[self._copySessionToForm(sess) for sess in sessions])
 
     @endpoints.method(SESS_GET_SPEAKER, SessionForms,
-                      path='session/{websafeSpeakerKey',
+                      path='session/speaker/{websafeSpeakerKey}',
                       http_method='GET',
                       name='getSessionsBySpeaker')
     def getSessionsBySpeaker(self, request):
@@ -760,13 +764,14 @@ class ConferenceApi(remote.Service):
             sessions=[self._copySessionToForm(sess) for sess in sessions])
 
     @endpoints.method(SESS_GET_TYPE, SessionForms,
-                      path='session/{typeOfSession}',
+                      path='session/type/{typeOfSession}',
                       http_method='GET',
                       name='getConferenceSessionsByType')
     def getConferenceSessionsByType(self, request):
         """ Return sessions by type """
         # query and filter by speaker name
         q = Session.query().filter(
+            Session.websafeConferenceKey == request.websafeConferenceKey,
             Session.typeOfSession == request.typeOfSession)
         # ordy by start time
         q = q.order(Session.startTime)
@@ -778,6 +783,7 @@ class ConferenceApi(remote.Service):
 # - - - Speaker objects - - - - - - - - - - - - - - - - - - -
 
     def _createSpeakerObject(self, request):
+        """ Creates speaker entity """
         user = endpoints.get_current_user()
         if not user:
             raise endpoints.UnauthorizedException('Authorization required.')
@@ -789,9 +795,10 @@ class ConferenceApi(remote.Service):
                 for field in request.all_fields()}
         del data['websafeKey']
         # store new speaker
-        Speaker(**data).put()
+        newSpeaker = Speaker(**data)
+        newSpeaker.put()
 
-        return request
+        return self._copySpeakerToForm(newSpeaker)
 
     def _copySpeakerToForm(self, speaker):
         """ speaker info in form format """
@@ -825,6 +832,20 @@ class ConferenceApi(remote.Service):
         speakers = Speaker.query().order(Speaker.name)
         return SpeakerForms(
             speakers=[self._copySpeakerToForm(speak) for speak in speakers])
+
+    @endpoints.method(SPK_GET_SPEAKER, SpeakerForm,
+                      path='getSpeaker',
+                      http_method='GET', name='getSpeaker')
+    def getSpeaker(self, request):
+        """ Get speakers by urlsafe key """
+        # query speakers by keys
+        speaker = ndb.Key(urlsafe=request.websafeSpeakerKey).get()
+        if not speaker:
+            raise endpoints.NotFoundException(
+                'No speaker found with key: %s'
+                % request.websafeSpeakerKey)
+        # return speaker form
+        return self._copySpeakerToForm(speaker)
 
 # - - - Wishlist objects - - - - - - - - - - - - - - - - - - -
 

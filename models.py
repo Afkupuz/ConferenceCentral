@@ -118,6 +118,7 @@ class ConferenceQueryForms(messages.Message):
 
 # define class for sessions and make it a child of Conference
 class Session(ndb.Model):
+    """ Session Entity Object """
     name            = ndb.StringProperty(required=True)
     highlights      = ndb.StringProperty()
     speakerKeys     = ndb.StringProperty(repeated=True)
@@ -129,6 +130,7 @@ class Session(ndb.Model):
 
 # define a session form and a child of conferenceform
 class SessionForm(messages.Message):
+    """ Session query from message form """
     name            = messages.StringField(1)
     highlights      = messages.StringField(2)
     speakerKeys     = messages.StringField(3, repeated=True)
@@ -141,10 +143,12 @@ class SessionForm(messages.Message):
 
 # for multiple returns
 class SessionForms(messages.Message):
+    """ Session multiple query form """
     sessions = messages.MessageField(SessionForm, 1, repeated=True)
 
 # enum for session types
 class TypeOfSession(messages.Enum):
+    """ enumeration for session types """
     Not_Specified = 1
     Keynote = 2
     Lecture = 3
@@ -153,6 +157,7 @@ class TypeOfSession(messages.Enum):
 
 # define entity class for speakers
 class Speaker(ndb.Model):
+    """ Speaker Entity Object """
     name            = ndb.StringProperty(required=True)
     organization    = ndb.StringProperty()
     bio             = ndb.StringProperty()
@@ -160,6 +165,7 @@ class Speaker(ndb.Model):
 
 # define form for speaker
 class SpeakerForm(messages.Message):
+    """ Speaker query from messages form """
     name            = messages.StringField(1)
     organization    = messages.StringField(2)
     bio             = messages.StringField(3)
@@ -168,4 +174,5 @@ class SpeakerForm(messages.Message):
 
 # for multiple returns
 class SpeakerForms(messages.Message):
+    """ Speaker multiple query form """
     speakers = messages.MessageField(SpeakerForm, 1, repeated=True)
