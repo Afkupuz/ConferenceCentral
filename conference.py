@@ -118,16 +118,15 @@ SESS_GET_WISHLIST = endpoints.ResourceContainer(
     websafeConferenceKey=messages.StringField(1),
 )
 
-SPEC_POST = endpoints.ResourceContainer(
+SPEC_GET = endpoints.ResourceContainer(
     message_types.VoidMessage,
     value=messages.IntegerField(1),
     operator=messages.StringField(2))
 
 SESS_POST_DOUBLE = endpoints.ResourceContainer(
     message_types.VoidMessage,
-    websafeConferenceKey=messages.StringField(1),
-    time=messages.StringField(2),
-    sess_type=messages.StringField(3))
+    time=messages.StringField(1),
+    sess_type=messages.StringField(2))
 
 FEAT_GET_SPEAKER = endpoints.ResourceContainer(
     message_types.VoidMessage,
@@ -892,7 +891,7 @@ class ConferenceApi(remote.Service):
         return BooleanMessage(data=retval)
 
     @endpoints.method(SESS_POST_WISHLIST, BooleanMessage,
-                      path='session/{websafeSessionKey}',
+                      path='session/{websafeSessionKey}/wishlist/post',
                       http_method='POST',
                       name='addSessionToWishlist')
     def addSessionToWishlist(self, request):
@@ -901,7 +900,7 @@ class ConferenceApi(remote.Service):
         return self._sessionWishList(request)
 
     @endpoints.method(SESS_POST_WISHLIST, BooleanMessage,
-                      path='session/{websafeSessionKey}',
+                      path='session/{websafeSessionKey}/wishlist/delete',
                       http_method='DELETE',
                       name='deleteSessionInWishlist')
     def deleteSessionInWishlist(self, request):
@@ -909,8 +908,9 @@ class ConferenceApi(remote.Service):
         # pass false value for to_add because it is set to true by default
         return self._sessionWishList(request, to_add=False)
 
-    @endpoints.method(SESS_GET_WISHLIST, SessionForms,
-                      path='wishlist/{websafeConferenceKey}',
+    @endpoints.method(message_types.VoidMessage, SessionForms,
+                      path='wishlist/get',
+                      http_method='GET',
                       name='getSessionsInWishlist')
     def getSessionsInWishlist(self, request):
         """Get sessions in user wishlist """
@@ -925,7 +925,7 @@ class ConferenceApi(remote.Service):
 
 # - - - Additional queries objects - - - - - - - - - - - - - - - - - - -
 
-    @endpoints.method(SPEC_POST, SpeakerForms,
+    @endpoints.method(SPEC_GET, SpeakerForms,
                       path='getSpeakerByRating',
                       http_method="GET",
                       name='getSpeakerByRating')
@@ -941,16 +941,16 @@ class ConferenceApi(remote.Service):
             # only one value to filter by so we don't
             # have to worry about too many inequality filters
             # fetch results
-            formatted_query = ndb.query.FilterNode(
-                "rating", op, request.value)
-            q = q.filter(formatted_query)
+        formatted_query = ndb.query.FilterNode(
+            "rating", op, request.value)
+        q = q.filter(formatted_query)
 
         return SpeakerForms(
             speakers=[self._copySpeakerToForm(speak) for speak in q])
 
-    @endpoints.method(SPEC_POST, ConferenceForms,
+    @endpoints.method(SPEC_GET, ConferenceForms,
                       path='getPercentFullConf',
-                      http_method='POST',
+                      http_method='GET',
                       name='getPercentFullConf')
     def getPercentFullConf(self, request):
         """ Get conferences by percent full """
@@ -990,10 +990,11 @@ class ConferenceApi(remote.Service):
                 confs, "percent return") for confs in conf_array])
 
     @endpoints.method(SESS_POST_DOUBLE, SessionForms,
-                      path='conference/{websafeConferenceKey/sessions/double',
+                      path='special/Query',
                       http_method='POST',
                       name='getDoubleQuerySession')
     def getDoubleQuerySession(self, request):
+        """ Return special double inequality query """
         # empty dic for sessions
         result = []
         # query sessions
@@ -1007,7 +1008,7 @@ class ConferenceApi(remote.Service):
         sessions = q.fetch()
         # use python to weed out conference types
         for sess in sessions:
-            if sess.typeOfSession == request.sess_type:
+            if sess.typeOfSession != request.sess_type:
                 result.append(sess)
         # return result of sort
         return SessionForms(
