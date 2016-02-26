@@ -392,9 +392,11 @@ class ConferenceApi(remote.Service):
         #      items=[self._copyConferenceToForm(
         #            conf, names[conf.organizerUserId]) for conf in \
         #      conferences])
+        
+        # activating this code seems to cause an error
 
         return ConferenceForms(items=[
-            self._copyConferenceToForm(conf, "Why_doesnt_this_work?")
+            self._copyConferenceToForm(conf, "")
             for conf in conferences])
 
 # - - - Profile objects - - - - - - - - - - - - - - - - - - -
