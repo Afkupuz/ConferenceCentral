@@ -46,7 +46,12 @@ Implement solution to query
    `$ git update-index --assume-unchanged app.yaml settings.py static/js/app.js`
 5. Run the app with the dev-server using `dev_appserver.py DIR`, and ensure it's running by visiting your local server's address (by default [localhost:8080][5].)
 6. (Optional) Generate your client library(ies) with [the endpoints tool][6].
-7. Deploy your application.
+7. Deploy your application.  
+  
+## Access To my project
+Visit https://scalableudacityproject.appspot.com/
+Credit for the nice-looking website goes to Udacity's course team, my work on endpoints can be seen via:
+https://scalableudacityproject.appspot.com/_ah/api/explorer
 
 ## My Project
 ### Sessions
