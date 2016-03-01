@@ -73,10 +73,12 @@ getPercentFullConf()
 The second query I implemented was more complicated. I decided that finding popular conferences would be made easier if people could see which were the most full. This was best expressed as a percentage, so I imported some math functions and used python to help with the fact that I needed multiple operators. Ultimately python does the heavy lifting of collecting conferences and calculating their percent full status, comparing to users parameters, and sorting the results. Users should use text based symbols for the operator as above.  
   
 getDoubleQuerySession()  
-The query question posed is a similar issue to my percentage based query in that it requires two inequalities:  
+The query question posed is a similar issue to my percentage based query in that it requires inequality parameters on multiple properties:  
 "Let’s say that you don't like workshops and you don't like sessions after 7 pm. How would you handle a query for all non-workshop sessions before 7 pm? What is the problem for implementing this query? What ways to solve it did you think of?"  
 The issue:  
-Googles database (ndb) query can only handle one inequality filter at a time. To perform this query, we need to request:  
+"Limitations: The Datastore enforces some restrictions on queries. Violating these will cause it to raise exceptions. For example, combining too many filters, using inequalities for multiple properties, or combining an inequality with a sort order on a different property are all currently disallowed. Also filters referencing multiple properties sometimes require secondary indexes to be configured." (https://cloud.google.com/appengine/docs/python/ndb/queries)  
+
+To perform this query, we need to request:  
 Session.startTime > 1900  
 And  
 Session.typeOfSession != Workshop
