@@ -884,7 +884,6 @@ class ConferenceApi(remote.Service):
             else:
                 raise ConflictException(
                     "This session is not in your wishlist")
-                retval = False
 
         # save profile changes
         prof.put()
