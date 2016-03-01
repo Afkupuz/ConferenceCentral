@@ -1024,6 +1024,8 @@ class ConferenceApi(remote.Service):
         spk_dic = {}
         # init return string
         featured = ""
+        # init featured speaker
+        featured_speaker = ""
         # get all sessions with speakers in current conference
         # use ancestor query for strong consistency
         wsck = request.get('websafeConferenceKey')
